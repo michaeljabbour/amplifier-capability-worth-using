@@ -19,7 +19,7 @@ The rubric has six criteria: Job, First value, Fit, Outcome, Trust, and Return. 
 - **Seen:** someone who is not on the team was observed using it, or reported a specific use with details.
 - **Repeated:** that person, or others like them, used it again without being asked, shown in logs or their own account.
 
-Evidence comes from what happened, not from how confident anyone sounds. Without a matching observation, say Claimed. A reading of the code is never Seen.
+Evidence comes from what happened, not from how confident anyone sounds. Without a matching observation, say Claimed. A reading of the code is never Seen, nor is a run by you or anyone working for the builder; with artifacts others can open, write Claimed (walkthrough) and name them. It never counts toward a zone.
 
 A supplied, dated record of specific use by someone outside the team can support Seen; name the record for each rating it supports, keep unsupported ratings Claimed, and use Repeated only when the records show unprompted return.
 
@@ -81,11 +81,11 @@ When a gate fails or a criterion stays Missing, name the symptom, the likely cau
 
 At exit, repeat the opening questions and place the builder again. Always produce the cards, including when the run fails or stops short. If the builder cancels, ask whether they want the cards before writing them. The templates are in references/rubric.md.
 
-- **Usefulness card:** the user and the job, then each criterion with its rating, its evidence, and one line; the zone status; the return check; anything cut. A team card adds each rater's ratings and the spread.
+- **Usefulness card:** one per named user. The user and the job, then each criterion with its rating, its evidence, and one line; the zone status; the return check; anything cut. A team card adds each rater's ratings and the spread.
 - **Growth card (Coach only):** started at (quoted), got to (quoted), the full jagged trace with labeled dips, the decision log, the builder's ratings against the observed ratings at each check, and where to start next time.
 
-Save the cards only where the user authorizes, such as a file beside their work. Do not claim memory you have not saved somewhere future work will read. In a staged run, such as the bundle's recipe, questions and passes are batched at each gate instead of asked one per turn; the gates still decide what is kept. When you cannot ask the user at all, for example because you were delegated this task, score from what you were given, apply the evidence rules above, and return your questions with the result instead of answering them yourself.
+Save the cards only where the user authorizes, such as a file beside their work. Do not claim memory you have not saved somewhere future work will read. In a staged run, such as the bundle's recipe, questions and passes are batched at each gate instead of asked one per turn; the gates still decide what is kept. When you cannot ask the user at all, for example because you were delegated this task, score from what you were given, apply the evidence rules above, and return your questions with the result instead of answering them yourself. Label assumptions; never write the builder's sentences or choices. For unattended rounds, several users, or a comparable card record, read references/delegated-runs.md.
 
 ## Keep it honest
 
-Never invent users, quotes, usage numbers, or observations. Fictional examples must be labeled fictional. A usefulness card is a description of the evidence today, not a forecast of adoption. Polish, naming, and positioning belong to other passes, for example market-fit or improve-taste-and-elegance; do not start them before the tool is stranger-ready.
+Never invent users, quotes, usage numbers, or observations. Fictional examples must be labeled fictional. A usefulness card is a description of the evidence today, not a forecast of adoption. Polish, naming, and positioning belong to other passes, for example market-fit or improve-taste-and-elegance; do not start them before the tool is stranger-ready. In a loop with one, this skill picks what to improve; the other decides how.

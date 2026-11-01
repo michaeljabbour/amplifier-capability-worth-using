@@ -33,7 +33,7 @@ Six criteria, each rated Missing, Partial, or Solid for one named user:
 | Trust | When it's wrong, can they tell, and recover? |
 | Return | Do they come back without being asked? |
 
-Every rating carries its evidence: **Claimed** (the builder says so, or it was inferred from code, docs, or a demo), **Seen** (someone not on the team was observed using it, or reported a specific use with details), or **Repeated** (that person, or others like them, used it again without being asked, shown in logs or their own account). Evidence is never upgraded, and the six are never added up.
+Every rating carries its evidence: **Claimed** (the builder says so, or it was inferred from code, docs, or a demo), **Seen** (someone not on the team was observed using it, or reported a specific use with details), or **Repeated** (that person, or others like them, used it again without being asked, shown in logs or their own account). Evidence is never upgraded, and the six are never added up. A run of the tool by the builder, or by an agent working for them, stays Claimed; with artifacts it is labeled Claimed (walkthrough).
 
 Two zones mark where to stop. **Stranger-ready**: Job, First value, Fit, Outcome, and Trust are Solid and at least Seen. **Worth using**: stranger-ready, plus Return is Solid and Repeated. Return usually takes days to show, so a session ends at stranger-ready with a return check: who, when, and what counts as coming back.
 
@@ -48,7 +48,7 @@ Give an agent the skill and the tool: a repo, a README, a demo, or a paragraph. 
 - **Score** (about ten minutes). The rubric alone, for reviews and ship decisions. Ends with a usefulness card.
 - **Coach** (bounded). An opening read of you, then five passes: Name the user, Watch the first ten minutes, Break it on purpose, Say what changed, Check for return. You rate first, predict first, and choose. Three rounds at most. Ends with a usefulness card and a growth card.
 
-If your tool supports reusable skills, copy the `skills/worth-using/` directory (`SKILL.md` plus `references/rubric.md`) according to that tool's instructions. Keep the relative `references/` path intact.
+If your tool supports reusable skills, copy the `skills/worth-using/` directory (`SKILL.md` plus `references/`) according to that tool's instructions. Keep the relative `references/` path intact.
 
 ### For teams
 
@@ -103,6 +103,8 @@ The Pages workflow builds and checks `_site/` on pushes to `main`, then publishe
 
 - `skills/worth-using/SKILL.md`: the method.
 - `skills/worth-using/references/rubric.md`: the six criteria, evidence grades, zones, team scoring, opening questions, builder dimensions, teaching moves, diagnosis table, card templates, and voice examples.
+- `skills/worth-using/references/delegated-runs.md`: walkthrough evidence, runs with nobody to ask, one card per user, round-to-round comparison, and pairing with a refinement skill.
+- `skills/worth-using/references/usefulness-card.schema.json`: an optional machine-readable usefulness card, one per user, so successive rounds can be compared.
 - `bundle.md`, `behaviors/worth-using.yaml`: the Amplifier bundle and its installable behavior.
 - `modes/useful.md`: the `/useful` mode.
 - `recipes/worth-using-round.yaml`: one staged, human-gated coaching round.

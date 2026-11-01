@@ -1,0 +1,482 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:amplifier:usefulness-card:v1",
+  "title": "Usefulness card/v1",
+  "description": "One usefulness card for one named user, comparable across rounds. Ratings and evidence stay separate per criterion and are never combined. Validation is conformance, not evidence that the tool is useful.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "card_id",
+    "tool",
+    "date",
+    "round",
+    "user",
+    "criteria",
+    "zone",
+    "return_check",
+    "cut",
+    "assumptions",
+    "questions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "usefulness-card/v1"
+    },
+    "card_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "previous_card_id": {
+      "description": "The earlier card for the same tool and user that this round is compared with.",
+      "type": "string",
+      "minLength": 1
+    },
+    "tool": {
+      "type": "string",
+      "minLength": 1
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "round": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "index",
+        "budget"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "score",
+            "coach"
+          ]
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "budget": {
+          "description": "Agreed round budget; null for a score-only card.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        }
+      }
+    },
+    "user": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "who",
+        "job",
+        "cost",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "description": "Stable key for this user or role, so rounds compare like with like.",
+          "type": "string",
+          "minLength": 1
+        },
+        "who": {
+          "description": "A named person or role in a setting.",
+          "type": "string",
+          "minLength": 1
+        },
+        "job": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cost": {
+          "description": "What the job costs them today, or \"unknown\"; never invented.",
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "stated",
+            "assumed"
+          ]
+        }
+      }
+    },
+    "criteria": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Job",
+        "First value",
+        "Fit",
+        "Outcome",
+        "Trust",
+        "Return"
+      ],
+      "properties": {
+        "Job": {
+          "$ref": "#/$defs/criterion"
+        },
+        "First value": {
+          "$ref": "#/$defs/criterion"
+        },
+        "Fit": {
+          "$ref": "#/$defs/criterion"
+        },
+        "Outcome": {
+          "$ref": "#/$defs/criterion"
+        },
+        "Trust": {
+          "$ref": "#/$defs/criterion"
+        },
+        "Return": {
+          "$ref": "#/$defs/criterion"
+        }
+      }
+    },
+    "zone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stranger_ready",
+        "worth_using",
+        "holding_back"
+      ],
+      "properties": {
+        "stranger_ready": {
+          "enum": [
+            "met",
+            "not-met"
+          ]
+        },
+        "worth_using": {
+          "enum": [
+            "met",
+            "not-met"
+          ]
+        },
+        "holding_back": {
+          "description": "Criteria keeping the target zone from being met.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/criterion_name"
+          }
+        }
+      }
+    },
+    "return_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "when",
+        "counts_as"
+      ],
+      "properties": {
+        "who": {
+          "type": "string",
+          "minLength": 1
+        },
+        "when": {
+          "type": "string",
+          "minLength": 1
+        },
+        "counts_as": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "cut": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "assumptions": {
+      "description": "Each assumption made because nobody could be asked. Empty when none.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "questions": {
+      "description": "Questions only the builder can answer, returned with the card rather than answered by the scorer.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "raters": {
+      "description": "Team version: each rater's independent ratings, collected before any reveal. The card's criteria hold the team rating backed by the strongest evidence, never an average.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "rater",
+          "ratings"
+        ],
+        "properties": {
+          "rater": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ratings": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "rating",
+                "evidence"
+              ],
+              "properties": {
+                "rating": {
+                  "$ref": "#/$defs/rating"
+                },
+                "evidence": {
+                  "$ref": "#/$defs/evidence"
+                },
+                "sentence": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "propertyNames": {
+              "$ref": "#/$defs/criterion_name"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "criterion_name": {
+      "enum": [
+        "Job",
+        "First value",
+        "Fit",
+        "Outcome",
+        "Trust",
+        "Return"
+      ]
+    },
+    "rating": {
+      "enum": [
+        "Missing",
+        "Partial",
+        "Solid"
+      ]
+    },
+    "evidence": {
+      "enum": [
+        "Claimed",
+        "Seen",
+        "Repeated"
+      ]
+    },
+    "criterion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rating",
+        "evidence",
+        "evidence_refs",
+        "line"
+      ],
+      "properties": {
+        "rating": {
+          "$ref": "#/$defs/rating"
+        },
+        "evidence": {
+          "$ref": "#/$defs/evidence"
+        },
+        "claimed_basis": {
+          "description": "Only for Claimed: the builder's word, a reading of code, docs or a demo, or a walkthrough of the real tool with artifacts. A walkthrough by the builder or an agent working for them is never Seen.",
+          "enum": [
+            "builder",
+            "reading",
+            "walkthrough"
+          ]
+        },
+        "evidence_refs": {
+          "description": "Artifacts or dated records behind the evidence: screenshots, transcripts, logs, or a named outside-use record.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "line": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "evidence": {
+                "const": "Claimed"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "claimed_basis"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "claimed_basis"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "anyOf": [
+              {
+                "properties": {
+                  "evidence": {
+                    "enum": [
+                      "Seen",
+                      "Repeated"
+                    ]
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "claimed_basis": {
+                    "const": "walkthrough"
+                  }
+                },
+                "required": [
+                  "claimed_basis"
+                ]
+              }
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence_refs": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ready": {
+      "properties": {
+        "rating": {
+          "const": "Solid"
+        },
+        "evidence": {
+          "enum": [
+            "Seen",
+            "Repeated"
+          ]
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "zone": {
+            "properties": {
+              "stranger_ready": {
+                "const": "met"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "criteria": {
+            "properties": {
+              "Job": {
+                "$ref": "#/$defs/ready"
+              },
+              "First value": {
+                "$ref": "#/$defs/ready"
+              },
+              "Fit": {
+                "$ref": "#/$defs/ready"
+              },
+              "Outcome": {
+                "$ref": "#/$defs/ready"
+              },
+              "Trust": {
+                "$ref": "#/$defs/ready"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "zone": {
+            "properties": {
+              "worth_using": {
+                "const": "met"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "zone": {
+            "properties": {
+              "stranger_ready": {
+                "const": "met"
+              }
+            }
+          },
+          "criteria": {
+            "properties": {
+              "Return": {
+                "properties": {
+                  "rating": {
+                    "const": "Solid"
+                  },
+                  "evidence": {
+                    "const": "Repeated"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "x-semantic-constraints": [
+    "One card per named user or role; cards for different users are never merged or averaged.",
+    "The six criteria are never added up, and a rating is never combined with its evidence grade.",
+    "Seen and Repeated need someone outside the team; the builder and any agent working for them are on the team.",
+    "Repeated needs recorded unprompted return.",
+    "previous_card_id names a card for the same tool and user.id; earlier cards are never rewritten.",
+    "An assumed user, assumption or proposed keep is never presented as the builder's own words or choice.",
+    "zone.holding_back lists the criteria short of the target zone, and is empty when that zone is met."
+  ]
+}
