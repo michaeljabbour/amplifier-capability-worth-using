@@ -89,3 +89,7 @@ Save the cards only where the user authorizes, such as a file beside their work.
 ## Keep it honest
 
 Never invent users, quotes, usage numbers, or observations. Fictional examples must be labeled fictional. A usefulness card is a description of the evidence today, not a forecast of adoption. Polish, naming, and positioning belong to other passes, for example market-fit or improve-taste-and-elegance; do not start them before the tool is stranger-ready. In a loop with one, this skill picks what to improve; the other decides how.
+
+## Optional session note
+
+Read [the local coaching guide](references/coaching-session.v1.md) only when the person asks for practice or optional session bookkeeping. Keep Score free of coaching/growth records; Coach retains its existing budget and evidence rules.

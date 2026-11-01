@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — optional coaching checkpoint
+
+- Add a self-contained opt-in practice/review guide with a fictional task, preserved baseline, explicit scope/budget, user stop, reviewed keep/revert and private-by-choice records. Keep native operations, existing method budgets and evidence rules unchanged; no human efficacy or outside-use result is claimed.
+
 ## Unreleased — agent-run rounds
 
 - Add the separately versioned `delegated-v1` evaluation preparation, canned transport and explicit call-bounded normal-transport collector. Freeze SKILL, rubric, delegated reference and schema with exact prompt/task hashes. Keep the historical runner, conditions, records and placebo unchanged; the new collector is exercised with fake transport end to end, and no live behavioral result is inherited or claimed.

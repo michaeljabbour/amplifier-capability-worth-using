@@ -136,3 +136,7 @@ This repository was renamed from `amplifier-skill-worth-using` to `amplifier-cap
 ## Delegated evaluation condition
 
 The [delegated-v1 protocol](docs/DELEGATED-EVALUATION.md) freezes the skill, rubric, delegated guide and card schema together. Preparation and canned offline checks make no provider calls. A separate call-bounded collector can execute those frozen requests through the normal transport after budget approval; it has only fake-transport test evidence in this change. Historical conditions and frozen records remain separate, with no behavioral result inferred.
+
+## Optional coaching
+
+For an explicitly requested practice or review checkpoint, use [the local coaching guide](skills/worth-using/references/coaching-session.v1.md). It includes a fictional first task, a baseline, a bounded budget, stop rules and human-reviewed keep/revert. No learner trace is saved by default, and software checks do not establish human learning or outside-user usefulness.
