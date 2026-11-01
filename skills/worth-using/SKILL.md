@@ -71,7 +71,7 @@ In round one, model each pass with a short worked example before the builder tri
 
 ## Read the person at every checkpoint
 
-After each pass, re-place the builder on the five dimensions. Keep the dips. Growth is jagged: a builder who watches a real user for the first time usually rates their own tool lower, and that drop is progress. When a dimension drops, say in one line what most likely caused it. Never smooth a trace, and never report growth you did not observe.
+After each pass, re-place the builder on the five dimensions. Keep the dips. A lower self-rating after watching a real user may reflect recalibration, but is not evidence of progress by itself. Ask for the builder's explanation and compare observed task evidence; label causal interpretations as hypotheses and keep growth unknown when either is unavailable or does not support a change. Never smooth a trace, and never report growth you did not observe.
 
 ## Diagnose instead of repeating
 
