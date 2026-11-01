@@ -67,7 +67,48 @@
           ],
           "minimum": 1
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "score"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "properties": {
+              "budget": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "coach"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "properties": {
+              "budget": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        }
+      ]
     },
     "user": {
       "type": "object",
@@ -449,6 +490,9 @@
             "properties": {
               "stranger_ready": {
                 "const": "met"
+              },
+              "holding_back": {
+                "maxItems": 0
               }
             }
           },
@@ -477,6 +521,7 @@
     "Repeated needs recorded unprompted return.",
     "previous_card_id names a card for the same tool and user.id; earlier cards are never rewritten.",
     "An assumed user, assumption or proposed keep is never presented as the builder's own words or choice.",
-    "zone.holding_back lists the criteria short of the target zone, and is empty when that zone is met."
+    "zone.holding_back lists the criteria short of the target zone, and is empty when that zone is met.",
+    "Score cards have a null round.budget; Coach cards have a positive agreed integer budget and round.index never exceeds it. The positive index can identify repeated Score cards without inventing a Coach budget."
   ]
 }

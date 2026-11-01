@@ -1,6 +1,6 @@
 # Worth Using
 
-[Open the guide and get the skill](https://michaeljabbour.github.io/amplifier-skill-worth-using/).
+[Open the guide and get the skill](https://michaeljabbour.github.io/amplifier-capability-worth-using/).
 
 A usefulness rubric with a coach. It scores whether a tool, feature, skill, or capability is genuinely useful to someone who didn't build it, on six plain criteria, with evidence attached to every rating. If you want, it then coaches you through a short, bounded loop so the tool and your own judgment improve together. It does not flatter the tool, fix it for you, or turn usefulness into one number.
 
@@ -13,8 +13,8 @@ This project pairs the [`worth-using` skill](skills/worth-using/SKILL.md) and it
 Bring a tool and one person it should help. Leave with six separate ratings, each tied to its evidence, and a practical gap to work on next.
 
 ```sh
-git clone https://github.com/michaeljabbour/amplifier-skill-worth-using.git
-cd amplifier-skill-worth-using
+git clone https://github.com/michaeljabbour/amplifier-capability-worth-using.git
+cd amplifier-capability-worth-using
 python3 scripts/capability.py install --dest ~/.agents/skills
 ```
 
@@ -39,7 +39,7 @@ Two zones mark where to stop. **Stranger-ready**: Job, First value, Fit, Outcome
 
 ## The film
 
-A 57-second film explains the idea with one fictional example: a meeting-summary bot everyone "loves," until a stranger feeds it an empty meeting. It plays on the [site](https://michaeljabbour.github.io/amplifier-skill-worth-using/#film) and lives at `site/assets/worth-using-film.mp4` with English captions.
+A 57-second film explains the idea with one fictional example: a meeting-summary bot everyone "loves," until a stranger feeds it an empty meeting. It plays on the [site](https://michaeljabbour.github.io/amplifier-capability-worth-using/#film) and lives at `site/assets/worth-using-film.mp4` with English captions.
 
 ## Use the skill
 
@@ -59,7 +59,7 @@ Agree the user and the job in one sentence. Then everyone rates the six criteria
 This repository is also an Amplifier bundle (`worth-using`). Add its behavior to your current host:
 
 ```bash
-amplifier bundle add "git+https://github.com/michaeljabbour/amplifier-skill-worth-using@main#subdirectory=behaviors/worth-using.yaml" --app
+amplifier bundle add "git+https://github.com/michaeljabbour/amplifier-capability-worth-using@main#subdirectory=behaviors/worth-using.yaml" --app
 ```
 
 For a local checkout that stays in step with your edits, use `file:///<path-to-checkout>/behaviors/worth-using.yaml` instead. Remove with `amplifier bundle remove worth-using-behavior --app`. Start a new session, then:
@@ -127,8 +127,12 @@ MIT; see [LICENSE](LICENSE). The family theme snapshot keeps its own [MIT notice
 
 Find what helps a stranger, with proof behind every rating.
 
-Read the [installation guide](docs/INSTALL.md) for the supported local path and [consolidation record](docs/CONSOLIDATION.md) for ownership and evidence limits. Canonical catalog name: **Worth Using**; repository: `amplifier-skill-worth-using`.
+Read the [installation guide](docs/INSTALL.md) for the supported local path and [consolidation record](docs/CONSOLIDATION.md) for ownership and evidence limits. Canonical catalog name: **Worth Using**; repository: `amplifier-capability-worth-using`.
 
 ## Repository migration
 
 This repository was renamed from `amplifier-skill-worth-using` to `amplifier-capability-worth-using`. Existing installed method names, bundle aliases and native interfaces stay the same. See the [migration guide](https://michaeljabbour.github.io/migration/) and [repository map](https://michaeljabbour.github.io/migration/mapping.json) for source URL updates.
+
+## Delegated evaluation condition
+
+The [delegated-v1 protocol](docs/DELEGATED-EVALUATION.md) freezes the skill, rubric, delegated guide and card schema together. Its preparation and canned offline transport checks run without provider calls; they are conformance evidence, not a behavioral result. Historical evaluation conditions and frozen records remain separate.

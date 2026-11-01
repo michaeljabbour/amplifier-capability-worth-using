@@ -37,3 +37,7 @@ This rubric decides what to improve: the weakest criterion, for one named user. 
 ## A card another agent can compare
 
 When a harness or another agent will store or compare cards, write each card to [usefulness-card.schema.json](usefulness-card.schema.json) as well as in words. It carries the same fields as the card template, plus the claimed basis, artifact references, assumptions, and returned questions. It refuses a zone the ratings and evidence do not support, and Seen or Repeated without a named record. Validation is conformance, not evidence that the tool is useful.
+
+## Card round boundaries
+
+A Score card has a positive round index and a null budget; the index may identify a later independent score of the same tool and user. A Coach card has an explicit positive agreed budget, and its index cannot exceed that budget. Three remains the default coaching budget; do not infer a larger agreement. JSON Schema checks mode and budget shape. Cross-field checks and named evidence records still need review: a valid file does not prove who ran a walkthrough or establish outside-user usefulness.
