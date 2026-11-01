@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased — agent-run rounds
+
+- Add the separately versioned `delegated-v1` evaluation preparation, canned transport and explicit call-bounded normal-transport collector. Freeze SKILL, rubric, delegated reference and schema with exact prompt/task hashes. Keep the historical runner, conditions, records and placebo unchanged; the new collector is exercised with fake transport end to end, and no live behavioral result is inherited or claimed.
+- Correct the new, unreleased usefulness-card/v1 draft boundaries: Score budget must be null, Coach budget positive, and cross-field semantic checks reject an index beyond that budget. Repeated Score snapshots retain positive indices without a Coach budget. Add committed schema and semantic negatives for these boundaries, matching outside-use records, unprompted return and zone honesty. Record metadata is not proof of authenticity.
+- Use canonical capability repository/guide URLs in first-use documentation while preserving method IDs, bundle names and migration-history aliases.
+
+- Let a Claimed rating name its basis. Claimed (walkthrough) is a run of the real tool by the builder or an agent working for them, with artifacts someone else can open. It is stronger than a reading, stays Claimed, never becomes Seen, and never counts toward a zone. The three grades and both zone rules are unchanged.
+- Add `references/delegated-runs.md` for runs with nobody to ask: label assumptions, leave the builder's sentences and choices marked as awaiting the builder, skip the growth card, and return questions with the card. It also covers one card per named user, round-to-round comparison without rewriting earlier cards, a stated rule for the next criterion to improve, fixed capture conditions for interface walkthroughs, and pairing with a refinement skill (this skill decides what, the other how).
+- Add the optional `references/usefulness-card.schema.json` (usefulness-card/v1) so a harness can compare cards across rounds. It enforces both zone rules and refuses Seen or Repeated without a named record. Both files ship in the download and bundle; the site check verifies the card's criteria and grades match the rubric.
+- Keep `SKILL.md` plus `references/rubric.md` within the evaluation's five-percent placebo length match; the detail lives in the new reference. No usefulness, outside-use, or behavioral result is claimed.
+
 ## 2026-10-28 — Public first use
 
 - Add a complete public clone/install path beside the first useful outcome, with prerequisites, safe updates and a full-folder ZIP alternative. Preserve the existing method, films and interactive examples.

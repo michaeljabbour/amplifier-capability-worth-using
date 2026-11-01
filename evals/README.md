@@ -90,3 +90,7 @@ The dated record contains exact frozen source copies, protocol and judge snapsho
 After the initial fictional run, preregister a separate follow-up cohort of 2–3 real team-built tools with authentic first-session records and six-week usage logs. Keep its estimates separate from the fictional exercise. No real records are supplied or implied by this package.
 
 For complete scientific limits and plan differences, read `PROTOCOL.md` and the selected `REPORT.md` before interpreting any result.
+
+## Separate delegated-v1 condition
+
+The linked delegated reference and card schema are included in full by the new [delegated protocol](../docs/DELEGATED-EVALUATION.md), selected through `evals/delegated.py`. Its explicit `worth-using-delegated-evaluation/v1` preparation, canned smoke and call-bounded normal-transport collector do not change historical `run.py` conditions, records or empirical status. Collection is implemented but has been tested with fake transport only; no live result or usefulness claim is made.

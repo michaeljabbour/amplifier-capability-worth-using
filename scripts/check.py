@@ -11,7 +11,7 @@ from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL_DIR = ROOT / 'skills/worth-using'
-SKILL_FILES = ('SKILL.md', 'references/rubric.md', 'LICENSE.md')
+SKILL_FILES = ('SKILL.md', 'references/rubric.md', 'references/delegated-runs.md', 'references/usefulness-card.schema.json', 'LICENSE.md')
 
 
 class Page(HTMLParser):
@@ -105,6 +105,10 @@ def check(output):
         assert bundle.testzip() is None
         for name in SKILL_FILES:
             assert bundle.read('worth-using/' + name) == (SKILL_DIR / name).read_bytes(), f'Bundle changed source: {name}'
+    card = json.loads((SKILL_DIR / 'references/usefulness-card.schema.json').read_text(encoding='utf-8'))
+    assert card['properties']['schema_version']['const'] == 'usefulness-card/v1', 'Unexpected usefulness card contract version'
+    assert card['properties']['criteria']['required'] == config['criteria'], 'Card criteria must match the rubric'
+    assert card['$defs']['evidence']['enum'] == ['Claimed', 'Seen', 'Repeated'], 'Card evidence grades must match the rubric'
     assert len(page.downloads) == 2, 'Expected skill and bundle download links'
     assert len(list(ROOT.rglob('SKILL.md'))) - len(list((ROOT / '_site').rglob('SKILL.md'))) == 1, 'Keep exactly one SKILL.md in the source tree'
     # Locally hosted assets are the only runtime dependencies.

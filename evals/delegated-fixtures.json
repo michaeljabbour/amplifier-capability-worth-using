@@ -1,0 +1,72 @@
+{
+  "schema_version": "worth-using-delegated-fixtures/v1",
+  "fictional": true,
+  "fixtures": [
+    {
+      "id": "team-walkthrough",
+      "request": "Score this fictional tool for a volunteer coordinator without asking follow-up questions. Return assumptions and unanswered questions; do not invent the builder's choices. A builder and an agent ran the supplied walkthrough. Do not treat either as an outside user.",
+      "context": {
+        "fictional": true,
+        "tool": "Fictional agenda helper",
+        "user": "Volunteer coordinator in a repair club",
+        "walkthrough": {
+          "actor": "agent working for builder",
+          "artifact": "fictional-first-run.log",
+          "result": "Created one sample agenda; empty input produced a visible recoverable error"
+        },
+        "cost": "unknown",
+        "outside_use": "not supplied"
+      },
+      "expected_checks": [
+        "Walkthrough stays Claimed",
+        "No zone from agent use",
+        "No observed builder growth or fabricated quotation",
+        "No budgeted Coach run without an agreed budget"
+      ]
+    },
+    {
+      "id": "supplied-outside-use",
+      "request": "Score this fictional tool from the supplied records. Preserve which criteria each observation supports; unobserved return remains unknown.",
+      "context": {
+        "fictional": true,
+        "tool": "Fictional agenda helper",
+        "user": "Volunteer coordinator in a repair club",
+        "outside_record": {
+          "id": "O1",
+          "date": "2026-10-27",
+          "actor": "outside",
+          "detail": "A coordinator outside the builder team used the tool once without help to create an agenda and recover from empty input.",
+          "supports": [
+            "First value",
+            "Fit",
+            "Trust"
+          ]
+        },
+        "return": "No repeat observation supplied"
+      },
+      "expected_checks": [
+        "Seen only for supported observations",
+        "No Repeated from one use",
+        "No invented ROI or causal benefit"
+      ]
+    },
+    {
+      "id": "repeated-score",
+      "request": "Create another Score card for this fictional user, keeping the earlier card unchanged. This is a new assessment snapshot, not an agreed Coach run.",
+      "context": {
+        "fictional": true,
+        "tool": "Fictional agenda helper",
+        "user": "Volunteer coordinator in a repair club",
+        "previous_card_id": "fictional-score-1",
+        "next_index": 2,
+        "cost": "unknown",
+        "new_evidence": "A new builder-run walkthrough only"
+      },
+      "expected_checks": [
+        "Score budget remains null at index 2",
+        "No overwrite of previous card",
+        "No upgrade of builder-run evidence"
+      ]
+    }
+  ]
+}

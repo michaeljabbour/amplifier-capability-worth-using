@@ -1,6 +1,6 @@
 # Worth Using
 
-[Open the guide and get the skill](https://michaeljabbour.github.io/amplifier-skill-worth-using/).
+[Open the guide and get the skill](https://michaeljabbour.github.io/amplifier-capability-worth-using/).
 
 A usefulness rubric with a coach. It scores whether a tool, feature, skill, or capability is genuinely useful to someone who didn't build it, on six plain criteria, with evidence attached to every rating. If you want, it then coaches you through a short, bounded loop so the tool and your own judgment improve together. It does not flatter the tool, fix it for you, or turn usefulness into one number.
 
@@ -13,8 +13,8 @@ This project pairs the [`worth-using` skill](skills/worth-using/SKILL.md) and it
 Bring a tool and one person it should help. Leave with six separate ratings, each tied to its evidence, and a practical gap to work on next.
 
 ```sh
-git clone https://github.com/michaeljabbour/amplifier-skill-worth-using.git
-cd amplifier-skill-worth-using
+git clone https://github.com/michaeljabbour/amplifier-capability-worth-using.git
+cd amplifier-capability-worth-using
 python3 scripts/capability.py install --dest ~/.agents/skills
 ```
 
@@ -33,13 +33,13 @@ Six criteria, each rated Missing, Partial, or Solid for one named user:
 | Trust | When it's wrong, can they tell, and recover? |
 | Return | Do they come back without being asked? |
 
-Every rating carries its evidence: **Claimed** (the builder says so, or it was inferred from code, docs, or a demo), **Seen** (someone not on the team was observed using it, or reported a specific use with details), or **Repeated** (that person, or others like them, used it again without being asked, shown in logs or their own account). Evidence is never upgraded, and the six are never added up.
+Every rating carries its evidence: **Claimed** (the builder says so, or it was inferred from code, docs, or a demo), **Seen** (someone not on the team was observed using it, or reported a specific use with details), or **Repeated** (that person, or others like them, used it again without being asked, shown in logs or their own account). Evidence is never upgraded, and the six are never added up. A run of the tool by the builder, or by an agent working for them, stays Claimed; with artifacts it is labeled Claimed (walkthrough).
 
 Two zones mark where to stop. **Stranger-ready**: Job, First value, Fit, Outcome, and Trust are Solid and at least Seen. **Worth using**: stranger-ready, plus Return is Solid and Repeated. Return usually takes days to show, so a session ends at stranger-ready with a return check: who, when, and what counts as coming back.
 
 ## The film
 
-A 57-second film explains the idea with one fictional example: a meeting-summary bot everyone "loves," until a stranger feeds it an empty meeting. It plays on the [site](https://michaeljabbour.github.io/amplifier-skill-worth-using/#film) and lives at `site/assets/worth-using-film.mp4` with English captions.
+A 57-second film explains the idea with one fictional example: a meeting-summary bot everyone "loves," until a stranger feeds it an empty meeting. It plays on the [site](https://michaeljabbour.github.io/amplifier-capability-worth-using/#film) and lives at `site/assets/worth-using-film.mp4` with English captions.
 
 ## Use the skill
 
@@ -48,7 +48,7 @@ Give an agent the skill and the tool: a repo, a README, a demo, or a paragraph. 
 - **Score** (about ten minutes). The rubric alone, for reviews and ship decisions. Ends with a usefulness card.
 - **Coach** (bounded). An opening read of you, then five passes: Name the user, Watch the first ten minutes, Break it on purpose, Say what changed, Check for return. You rate first, predict first, and choose. Three rounds at most. Ends with a usefulness card and a growth card.
 
-If your tool supports reusable skills, copy the `skills/worth-using/` directory (`SKILL.md` plus `references/rubric.md`) according to that tool's instructions. Keep the relative `references/` path intact.
+If your tool supports reusable skills, copy the `skills/worth-using/` directory (`SKILL.md` plus `references/`) according to that tool's instructions. Keep the relative `references/` path intact.
 
 ### For teams
 
@@ -59,7 +59,7 @@ Agree the user and the job in one sentence. Then everyone rates the six criteria
 This repository is also an Amplifier bundle (`worth-using`). Add its behavior to your current host:
 
 ```bash
-amplifier bundle add "git+https://github.com/michaeljabbour/amplifier-skill-worth-using@main#subdirectory=behaviors/worth-using.yaml" --app
+amplifier bundle add "git+https://github.com/michaeljabbour/amplifier-capability-worth-using@main#subdirectory=behaviors/worth-using.yaml" --app
 ```
 
 For a local checkout that stays in step with your edits, use `file:///<path-to-checkout>/behaviors/worth-using.yaml` instead. Remove with `amplifier bundle remove worth-using-behavior --app`. Start a new session, then:
@@ -103,6 +103,8 @@ The Pages workflow builds and checks `_site/` on pushes to `main`, then publishe
 
 - `skills/worth-using/SKILL.md`: the method.
 - `skills/worth-using/references/rubric.md`: the six criteria, evidence grades, zones, team scoring, opening questions, builder dimensions, teaching moves, diagnosis table, card templates, and voice examples.
+- `skills/worth-using/references/delegated-runs.md`: walkthrough evidence, runs with nobody to ask, one card per user, round-to-round comparison, and pairing with a refinement skill.
+- `skills/worth-using/references/usefulness-card.schema.json`: an optional machine-readable usefulness card, one per user, so successive rounds can be compared.
 - `bundle.md`, `behaviors/worth-using.yaml`: the Amplifier bundle and its installable behavior.
 - `modes/useful.md`: the `/useful` mode.
 - `recipes/worth-using-round.yaml`: one staged, human-gated coaching round.
@@ -125,8 +127,12 @@ MIT; see [LICENSE](LICENSE). The family theme snapshot keeps its own [MIT notice
 
 Find what helps a stranger, with proof behind every rating.
 
-Read the [installation guide](docs/INSTALL.md) for the supported local path and [consolidation record](docs/CONSOLIDATION.md) for ownership and evidence limits. Canonical catalog name: **Worth Using**; repository: `amplifier-skill-worth-using`.
+Read the [installation guide](docs/INSTALL.md) for the supported local path and [consolidation record](docs/CONSOLIDATION.md) for ownership and evidence limits. Canonical catalog name: **Worth Using**; repository: `amplifier-capability-worth-using`.
 
 ## Repository migration
 
 This repository was renamed from `amplifier-skill-worth-using` to `amplifier-capability-worth-using`. Existing installed method names, bundle aliases and native interfaces stay the same. See the [migration guide](https://michaeljabbour.github.io/migration/) and [repository map](https://michaeljabbour.github.io/migration/mapping.json) for source URL updates.
+
+## Delegated evaluation condition
+
+The [delegated-v1 protocol](docs/DELEGATED-EVALUATION.md) freezes the skill, rubric, delegated guide and card schema together. Preparation and canned offline checks make no provider calls. A separate call-bounded collector can execute those frozen requests through the normal transport after budget approval; it has only fake-transport test evidence in this change. Historical conditions and frozen records remain separate, with no behavioral result inferred.
