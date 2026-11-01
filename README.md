@@ -135,4 +135,4 @@ This repository was renamed from `amplifier-skill-worth-using` to `amplifier-cap
 
 ## Delegated evaluation condition
 
-The [delegated-v1 protocol](docs/DELEGATED-EVALUATION.md) freezes the skill, rubric, delegated guide and card schema together. Its preparation and canned offline transport checks run without provider calls; they are conformance evidence, not a behavioral result. Historical evaluation conditions and frozen records remain separate.
+The [delegated-v1 protocol](docs/DELEGATED-EVALUATION.md) freezes the skill, rubric, delegated guide and card schema together. Preparation and canned offline checks make no provider calls. A separate call-bounded collector can execute those frozen requests through the normal transport after budget approval; it has only fake-transport test evidence in this change. Historical conditions and frozen records remain separate, with no behavioral result inferred.

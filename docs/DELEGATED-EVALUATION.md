@@ -10,7 +10,7 @@ Prepare without a provider call:
 python3 evals/delegated.py --prepare --record 2026-11-01/delegated-v1-preparation
 ```
 
-This command creates a **preparation record only**. It does not run an evaluated agent or judge, and it does not modify `docs/BENCHMARK.md`. The manifest records zero empirical trials and zero API calls. The historical runner intentionally rejects this new condition rather than accidentally analyzing it as its old `skill` arm.
+This command creates a **preparation record only**. It does not run an evaluated agent or judge, and it does not modify `docs/BENCHMARK.md`. The manifest records zero empirical trials and zero API calls. The historical runner intentionally rejects this new condition rather than accidentally analyzing it as its old `skill` arm. The separate `--collect` path executes its exact frozen prompts through the normal transport after an explicit call budget is supplied.
 
 The optional offline transport check consumes those exact frozen prompts and tasks with the existing canned client:
 
@@ -28,8 +28,22 @@ Required checks are separate: six criteria and their evidence grades; no upgrade
 
 `card_contract.semantic_errors` checks cross-field relationships and the presence of matching dated outside-use metadata. Such metadata must be supplied by the operator. It makes no network requests, does not open evidence paths and cannot establish that records are authentic or sufficient in the real world. Read the records yourself. JSON Schema covers structure; the semantic checker covers relations such as index versus budget.
 
-## Empirical collection remains unrun
+## Executable collection, not run against a provider in this change
 
-No new provider budget is authorized. This preparation has no length-matched placebo, different-family blind judge, calibrated metric or measured treatment effect. It is not Right Shape L1 and cannot inherit historical results. Before a live collection, preregister a fixed task set, shared transport, budget and stop rule, a length-matched placebo, paired randomization, independent-family judgment and evidence-grounded error denominators. A collector must use the frozen prompt/task bytes and identify this new condition explicitly; no live collection is implemented by this entry point.
+After a separately approved provider/model budget, configure the existing `EVAL_MODEL`, provider, output-token and key environment settings. No key belongs in a file or command argument. To execute the fixed single-turn collection:
+
+```sh
+python3 evals/delegated.py --collect --record 2026-11-01/delegated-v1-preparation --collection-id trial-1 --max-calls 6
+```
+
+The three paired requests require six calls. A smaller or missing call budget rejects before transport. Every request uses the validated frozen four-file treatment or plain baseline and the same frozen user task. The collector captures request bytes before any call, saves exact copies under the new collection, records returned model/usage information, preserves incomplete envelopes, and stops on the first transport error without retrying. Existing collection IDs are never overwritten. A new collection ID repeats the fixed schedule and needs its own explicit budget.
+
+The call cap is not a dollar cap: provider prices, tokenizer overhead and billable errors depend on the selected account/model. Approve that spend separately before invoking `--collect`. The API client has its existing request timeout and output-token setting. This code never creates credentials or chooses a model for you.
+
+The collector is transport-injectable. Fake-transport tests exercise the same collection and CLI path without HTTP, preserve zero empirical trials for synthetic responses, reject corrupted freezes/budget violations, and check error stopping. Preparation and canned smoke stay available independently. Raw one-turn responses are not automatically graded cards; incomplete responses remain incomplete and require review. No advice or proposed product action is executed.
+
+## Empirical results remain unrun
+
+No new provider budget is authorized. This preparation has no length-matched placebo, different-family blind judge, calibrated metric or measured treatment effect. It is not Right Shape L1 and cannot inherit historical results. Before a live collection, preregister a fixed task set, shared transport, budget and stop rule, a length-matched placebo, paired randomization, independent-family judgment and evidence-grounded error denominators. The implemented collector uses the frozen prompt/task bytes and identifies this new condition explicitly. Its fixed paired order is recorded; it is not a randomized or blinded L1 analysis. Independent grading and the preregistered wider comparison remain separate work.
 
 Run the standard-library semantic and treatment tests with `python3 -m unittest discover -s evals -p 'test_*.py'`. JSON Schema tests also run when the existing `jsonschema` test tool is available; otherwise those cases explicitly skip. No dependency is downloaded by tests or preparation. These are software/conformance results, not observations of a human using a tool.

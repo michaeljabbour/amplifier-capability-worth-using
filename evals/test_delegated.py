@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+import io
 import hashlib
 import json
 from pathlib import Path
@@ -10,6 +11,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
@@ -17,7 +19,7 @@ sys.path.insert(0, str(HERE))
 import card_contract
 import delegated
 import prompts
-from providers import ConfigurationError
+from providers import ConfigurationError, Settings, ProviderError
 from source_selection import SOURCE_FILES
 
 try:
@@ -167,7 +169,7 @@ class SchemaTests(unittest.TestCase):
         self.assertTrue(list(self.validator.iter_errors(value)))
 
 
-class TreatmentTests(unittest.TestCase):
+class TreatmentFixture:
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(prefix="worth-delegated-")
         self.addCleanup(self.tmp.cleanup)
@@ -189,6 +191,8 @@ class TreatmentTests(unittest.TestCase):
         self.git("add", ".")
         self.git("-c", "user.name=Fictional Contract Fixture", "-c", "user.email=fixture@example.invalid", "commit", "--no-gpg-sign", "-qm", "fixture")
 
+
+class TreatmentTests(TreatmentFixture, unittest.TestCase):
     def test_complete_new_prompt_and_all_four_materials_are_frozen(self):
         result = delegated.prepare(self.root, "2026-11-01/new")
         folder = self.root / "docs/evaluations/2026-11-01/new"
@@ -298,6 +302,154 @@ class TreatmentTests(unittest.TestCase):
         with self.assertRaisesRegex(ConfigurationError, "version"):
             delegated.offline_smoke(self.root, "2026-11-01/version")
         self.assertFalse((folder / "offline-smoke").exists())
+
+
+class FakeTransport:
+    """Injected only: never constructs an HTTP request or reads credentials."""
+    def __init__(self, *, fail_at=None, content=None, callback=None):
+        self.calls = []
+        self.fail_at = fail_at
+        self.content = content
+        self.callback = callback
+
+    def complete(self, messages, seed):
+        self.calls.append(copy.deepcopy(messages))
+        if self.callback:
+            self.callback(len(self.calls))
+        if len(self.calls) == self.fail_at:
+            raise ProviderError("Synthetic transport rejection")
+        return {"content": self.content or json.dumps({"reply": "Synthetic collected response, not a model result", "done": True}),
+                "model_requested": "fixture-model", "model_returned": "fixture-model-returned", "provider": "synthetic-test",
+                "usage": {"input_tokens": 3, "output_tokens": 2}, "is_empirical": False}
+
+
+class CollectorTests(TreatmentFixture, unittest.TestCase):
+    """Exercise the same collector used by the CLI, with no provider requests."""
+    def prepared(self):
+        delegated.prepare(self.root, "2026-11-01/collect")
+        return self.root / "docs/evaluations/2026-11-01/collect"
+
+    def test_collector_executes_both_actual_frozen_conditions_with_paired_tasks(self):
+        folder = self.prepared(); before = (folder / "manifest.json").read_bytes(); client = FakeTransport()
+        result = delegated.collect(self.root, "2026-11-01/collect", client, max_calls=6)
+        self.assertEqual(result["status"], "collection-complete")
+        self.assertEqual(result["collector_version"], delegated.COLLECTOR_VERSION)
+        self.assertEqual(result["attempted_calls"], 6)
+        self.assertEqual(result["completed_trials"], 6)
+        self.assertEqual(result["completed_empirical_trials"], 0)
+        self.assertFalse(result["is_empirical"])
+        for index in range(0, 6, 2):
+            self.assertEqual(client.calls[index][1], client.calls[index + 1][1])
+            for _, snapshot in delegated.TREATMENT:
+                self.assertIn((folder / snapshot).read_text(), client.calls[index][0]["content"])
+            self.assertEqual(client.calls[index + 1][0]["content"], prompts.PREAMBLE)
+        self.assertTrue(all(c["response"]["model_returned"] == "fixture-model-returned" for c in result["calls"]))
+        self.assertEqual((folder / "manifest.json").read_bytes(), before)
+
+    def test_call_budget_and_existing_collection_fail_before_any_transport(self):
+        folder = self.prepared(); client = FakeTransport()
+        for budget in [None, True, 0, 5]:
+            with self.subTest(budget=budget), self.assertRaises(ConfigurationError):
+                delegated.collect(self.root, "2026-11-01/collect", client, max_calls=budget)
+        self.assertEqual(client.calls, [])
+        self.assertFalse((folder / "collections").exists())
+        delegated.collect(self.root, "2026-11-01/collect", client, max_calls=6)
+        fresh = FakeTransport()
+        with self.assertRaises(ConfigurationError):
+            delegated.collect(self.root, "2026-11-01/collect", fresh, max_calls=6)
+        self.assertEqual(fresh.calls, [])
+
+    def test_corrupted_freeze_fails_before_any_transport(self):
+        folder = self.prepared(); client = FakeTransport()
+        (folder / "prompts/delegated-v1.txt").write_text("Changed frozen treatment")
+        with self.assertRaises(ConfigurationError):
+            delegated.collect(self.root, "2026-11-01/collect", client, max_calls=6)
+        self.assertEqual(client.calls, [])
+
+    def test_moving_or_unavailable_source_ref_never_reaches_transport(self):
+        folder = self.prepared(); original = json.loads((folder / "manifest.json").read_text())
+        for value in ["HEAD", "main", "a" * 40, None]:
+            with self.subTest(source_commit=value):
+                manifest = copy.deepcopy(original); manifest["source_commit"] = value
+                (folder / "manifest.json").write_text(json.dumps(manifest))
+                client = FakeTransport()
+                with self.assertRaises(ConfigurationError):
+                    delegated.collect(self.root, "2026-11-01/collect", client, max_calls=6)
+                self.assertEqual(client.calls, [])
+
+    def test_provider_error_is_retained_without_retry_or_automatic_resume(self):
+        folder = self.prepared(); client = FakeTransport(fail_at=2)
+        result = delegated.collect(self.root, "2026-11-01/collect", client, max_calls=6)
+        self.assertEqual(result["status"], "collection-stopped-on-error")
+        self.assertEqual(result["attempted_calls"], 2)
+        self.assertEqual(result["completed_trials"], 1)
+        self.assertEqual(result["calls"][1]["status"], "transport-error")
+        self.assertTrue((folder / "collections/trial-1/RESULT.json").exists())
+
+    def test_invalid_envelope_does_not_become_a_completed_trial(self):
+        self.prepared(); client = FakeTransport(content="not an envelope")
+        result = delegated.collect(self.root, "2026-11-01/collect", client, max_calls=6)
+        self.assertEqual(result["status"], "collection-has-incomplete-responses")
+        self.assertEqual(result["completed_trials"], 0)
+        self.assertEqual(result["completed_empirical_trials"], 0)
+        self.assertEqual(result["attempted_calls"], 6)
+
+    def test_inputs_are_captured_before_transport_and_not_reread_between_trials(self):
+        folder = self.prepared(); original = (folder / "prompts/delegated-v1.txt").read_text()
+        def change_parent(index):
+            if index == 1:
+                (folder / "prompts/delegated-v1.txt").write_text("Concurrent change after capture")
+        client = FakeTransport(callback=change_parent)
+        result = delegated.collect(self.root, "2026-11-01/collect", client, max_calls=6)
+        self.assertEqual(result["completed_trials"], 6)
+        self.assertTrue(all(client.calls[i][0]["content"] == original for i in [0, 2, 4]))
+        captured = folder / "collections/trial-1/captured-inputs/prompts/delegated-v1.txt"
+        self.assertEqual(captured.read_text(), original)
+
+    def test_collection_path_cannot_follow_an_external_symlink(self):
+        folder = self.prepared(); elsewhere = self.root / "elsewhere"; elsewhere.mkdir()
+        (folder / "collections").symlink_to(elsewhere, target_is_directory=True)
+        client = FakeTransport()
+        with self.assertRaises(ConfigurationError):
+            delegated.collect(self.root, "2026-11-01/collect", client, max_calls=6)
+        self.assertEqual(client.calls, [])
+        self.assertEqual(list(elsewhere.iterdir()), [])
+
+    def test_cli_collect_uses_normal_transport_interface_without_test_network(self):
+        folder = self.prepared(); client = FakeTransport(); cfg = Settings("eval", "fixture-model", "openai", 0, 100, False)
+        with patch.object(delegated, "ROOT", self.root), patch.object(delegated, "settings_for", return_value=cfg), \
+             patch.object(delegated, "APIClient", return_value=client) as factory, \
+             patch.dict("os.environ", {"OPENAI_API_KEY": "synthetic-not-a-real-key"}, clear=True), \
+             patch("sys.stdout", new_callable=io.StringIO):
+            code = delegated.main(["--collect", "--record", "2026-11-01/collect", "--max-calls", "6"])
+        self.assertEqual(code, 0)
+        factory.assert_called_once_with(cfg)
+        self.assertEqual(len(client.calls), 6)
+        result = json.loads((folder / "collections/trial-1/RESULT.json").read_text())
+        self.assertEqual(result["completed_empirical_trials"], 0)
+        self.assertEqual(result["configuration"]["model"], "fixture-model")
+
+    def test_cli_missing_budget_or_credentials_never_constructs_transport(self):
+        self.prepared(); cfg = Settings("eval", "fixture-model", "openai", 0, 100, False)
+        with patch.object(delegated, "ROOT", self.root), patch.object(delegated, "settings_for", return_value=cfg), \
+             patch.object(delegated, "APIClient") as factory, patch.dict("os.environ", {}, clear=True), \
+             patch("sys.stderr", new_callable=io.StringIO):
+            self.assertEqual(delegated.main(["--collect", "--record", "2026-11-01/collect"]), 2)
+            self.assertEqual(delegated.main(["--collect", "--record", "2026-11-01/collect", "--max-calls", "6"]), 2)
+        factory.assert_not_called()
+
+    def test_cli_transport_failure_returns_nonzero_and_keeps_partial_outcome(self):
+        folder = self.prepared(); client = FakeTransport(fail_at=2); cfg = Settings("eval", "fixture-model", "openai", 0, 100, False)
+        with patch.object(delegated, "ROOT", self.root), patch.object(delegated, "settings_for", return_value=cfg), \
+             patch.object(delegated, "APIClient", return_value=client), \
+             patch.dict("os.environ", {"OPENAI_API_KEY": "synthetic-not-a-real-key"}, clear=True), \
+             patch("sys.stdout", new_callable=io.StringIO):
+            code = delegated.main(["--collect", "--record", "2026-11-01/collect", "--max-calls", "6"])
+        self.assertEqual(code, 2)
+        result = json.loads((folder / "collections/trial-1/RESULT.json").read_text())
+        self.assertEqual(result["attempted_calls"], 2)
+        self.assertEqual(result["completed_trials"], 1)
+        self.assertTrue(result["calls"][1]["billing_or_server_execution_unknown"])
 
 
 if __name__ == "__main__":

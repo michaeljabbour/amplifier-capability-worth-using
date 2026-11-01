@@ -2,7 +2,7 @@
 
 ## Unreleased — agent-run rounds
 
-- Add the separately versioned `delegated-v1` evaluation preparation and canned transport condition. Freeze SKILL, rubric, delegated reference and schema with exact prompt/task hashes. Keep the historical runner, conditions, records and placebo unchanged; no live behavioral result is inherited or claimed.
+- Add the separately versioned `delegated-v1` evaluation preparation, canned transport and explicit call-bounded normal-transport collector. Freeze SKILL, rubric, delegated reference and schema with exact prompt/task hashes. Keep the historical runner, conditions, records and placebo unchanged; the new collector is exercised with fake transport end to end, and no live behavioral result is inherited or claimed.
 - Correct the new, unreleased usefulness-card/v1 draft boundaries: Score budget must be null, Coach budget positive, and cross-field semantic checks reject an index beyond that budget. Repeated Score snapshots retain positive indices without a Coach budget. Add committed schema and semantic negatives for these boundaries, matching outside-use records, unprompted return and zone honesty. Record metadata is not proof of authenticity.
 - Use canonical capability repository/guide URLs in first-use documentation while preserving method IDs, bundle names and migration-history aliases.
 

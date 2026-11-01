@@ -93,4 +93,4 @@ For complete scientific limits and plan differences, read `PROTOCOL.md` and the 
 
 ## Separate delegated-v1 condition
 
-The linked delegated reference and card schema are included in full by the new [delegated protocol](../docs/DELEGATED-EVALUATION.md), selected through `evals/delegated.py`. Its explicit `worth-using-delegated-evaluation/v1` preparation and optional canned transport checks do not change historical `run.py` conditions, records or empirical status. No live collection or usefulness result is claimed.
+The linked delegated reference and card schema are included in full by the new [delegated protocol](../docs/DELEGATED-EVALUATION.md), selected through `evals/delegated.py`. Its explicit `worth-using-delegated-evaluation/v1` preparation, canned smoke and call-bounded normal-transport collector do not change historical `run.py` conditions, records or empirical status. Collection is implemented but has been tested with fake transport only; no live result or usefulness claim is made.
