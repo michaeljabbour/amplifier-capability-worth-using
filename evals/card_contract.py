@@ -35,9 +35,12 @@ def semantic_errors(card, records=None, previous=None):
             errors.append("Coach cards require an explicit positive integer round.budget")
         elif _positive_integer(index) and index > budget:
             errors.append("round.index exceeds the agreed round.budget")
+    card_date = None
     try:
         value = card.get("date", "")
-        if date.fromisoformat(value).isoformat() != value:
+        card_date = date.fromisoformat(value)
+        if card_date.isoformat() != value:
+            card_date = None
             raise ValueError()
     except (TypeError, ValueError):
         errors.append("date must be a real ISO calendar date")
@@ -83,7 +86,9 @@ def semantic_errors(card, records=None, previous=None):
             if not isinstance(record, dict):
                 continue
             try:
-                dated = date.fromisoformat(record.get("date", "")).isoformat() == record.get("date")
+                observed_date = date.fromisoformat(record.get("date", ""))
+                dated = (observed_date.isoformat() == record.get("date")
+                         and card_date is not None and observed_date <= card_date)
             except (ValueError, TypeError):
                 dated = False
             supported = record.get("criteria", [])
@@ -93,7 +98,7 @@ def semantic_errors(card, records=None, previous=None):
                     and isinstance(record.get("detail"), str) and record["detail"].strip()):
                 matching.append(record)
         if not matching:
-            errors.append(name + ": " + str(grade) + " needs a matching dated record of specific outside-team use")
+            errors.append(name + ": " + str(grade) + " needs a matching record of specific outside-team use dated on or before the card")
         elif grade == "Repeated" and not any(r.get("unprompted_return") is True for r in matching):
             errors.append(name + ": Repeated needs recorded unprompted return")
     ready = all(criteria[c].get("rating") == "Solid" and criteria[c].get("evidence") in ("Seen", "Repeated") for c in CRITERIA[:5] if isinstance(criteria[c], dict))

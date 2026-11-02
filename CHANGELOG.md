@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — observation chronology
+
+- Do not let an observation after a usefulness card's date support Seen or Repeated for that assessment. Keep same-day and earlier supplied records valid, and do not let a future return upgrade past use. Add negative and valid-control regressions without changing the frozen skill, rubric, controls or earlier outcomes.
+
 ## Unreleased — optional coaching checkpoint
 
 - Add a self-contained opt-in practice/review guide with a fictional task, preserved baseline, explicit scope/budget, user stop, reviewed keep/revert and private-by-choice records. Keep native operations, existing method budgets and evidence rules unchanged; no human efficacy or outside-use result is claimed.

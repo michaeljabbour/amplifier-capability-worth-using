@@ -1,5 +1,7 @@
 # The bar Worth Using has to clear
 
+The optional card validator checks supplied observation dates against the assessment date: only records on or before the card can support Seen or Repeated, including a claimed unprompted return. This is metadata chronology, not authentication of a person, actual use or a date. Past and same-day valid records retain their support. No historical card or outcome is rewritten.
+
 **Status: not yet run.** This is the benchmark plan. Thresholds are proposals to argue about, not results. No outcome on this page has been observed.
 
 ## Setup
