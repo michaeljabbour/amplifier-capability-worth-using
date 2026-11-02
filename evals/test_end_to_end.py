@@ -24,6 +24,7 @@ import experiment
 import metrics
 import prompts
 import providers
+from control_selection import select_current_control, freeze_control
 
 
 def synthetic_judgment(packet):
@@ -131,11 +132,14 @@ class TwoFixturePipelineTests(unittest.TestCase):
 
             skill = (ROOT / "skills/worth-using/SKILL.md").read_text()
             rubric = (ROOT / "skills/worth-using/references/rubric.md").read_text()
-            placebo = prompts.placebo_text(skill + "\n\n" + rubric)
+            control = select_current_control(ROOT, skill + "\n\n" + rubric)
+            placebo = control.text
+            freeze_control(output, control)
             configs = [providers.Settings(role, "synthetic-" + role + "-v1", "openai", 0.2, 1000, False)
                        for role in ["eval", "judge", "simulator"]]
             conditions = ["skill", "baseline", "placebo"]
             manifest = {
+                "placebo_control": control.metadata,
                 "models": {cfg.role: dict(cfg.public(), model_family="synthetic-" + cfg.role,
                                            model_family_basis="operator_declared_not_api_verified") for cfg in configs},
                 "source_hashes": {"skill_sha256": experiment.digest(skill),

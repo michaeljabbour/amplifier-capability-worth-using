@@ -1,0 +1,12 @@
+{
+  "protocol_version": "worth-using-neutral-control/v2",
+  "controls": [
+    {
+      "control_id": "generic-product-review-v2",
+      "treatment_sha256": "e96fa2f8c0e608f2b5881469d45fe4718e0b28c4a023d804458ff3e6cc6fafdc",
+      "corpus_path": "evals/controls/generic-product-review-v2.txt",
+      "corpus_sha256": "402f1d3f2e5a9973775020ef593adf6353db68664a85c03966ab243ab9a4bb97",
+      "selection": "whole"
+    }
+  ]
+}

@@ -33,6 +33,7 @@ class SourceVersionTests(unittest.TestCase):
             path.write_bytes(data)
             self.original[source_path] = data
         (self.root / "evals").mkdir()
+        shutil.copytree(HERE / "controls", self.root / "evals/controls")
         for name in ("PROTOCOL.md", "judge_rubric.md", "placebo.txt"):
             shutil.copyfile(HERE / name, self.root / "evals" / name)
         self.git = patch.object(selection, "_git", side_effect=self.git_read)
@@ -154,6 +155,7 @@ class SourceVersionTests(unittest.TestCase):
                     "completed_empirical_trials": 0}
         runner.write_json(output / "manifest.json", manifest)
         (self.root / "skills/worth-using/SKILL.md").unlink()
+        shutil.rmtree(self.root / "evals/controls")  # Analysis must not select a current control.
         args = SimpleNamespace(date="2026-10-23", run_id=None, analyze=True, record="2026-10-23/original",
                                source_record=None, pilot=False, offline_smoke=False, validate=False, bootstrap=20)
         with patch.object(runner, "ROOT", self.root), patch.object(runner, "parse_args", return_value=args), \

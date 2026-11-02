@@ -94,3 +94,5 @@ For complete scientific limits and plan differences, read `PROTOCOL.md` and the 
 ## Separate delegated-v1 condition
 
 The linked delegated reference and card schema are included in full by the new [delegated protocol](../docs/DELEGATED-EVALUATION.md), selected through `evals/delegated.py`. Its explicit `worth-using-delegated-evaluation/v1` preparation, canned smoke and call-bounded normal-transport collector do not change historical `run.py` conditions, records or empirical status. Collection is implemented but has been tested with fake transport only; no live result or usefulness claim is made.
+
+Neutral controls are now selected by exact treatment hash from `controls/index.json` and frozen per new run. The original `placebo.txt` is retained for historical inspection only. Older source-record execution without a verifiable frozen matching control stops; `--analyze --record` remains available. See the v2 section in PROTOCOL.md.

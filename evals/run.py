@@ -17,7 +17,9 @@ from zoneinfo import ZoneInfo
 sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "evals"))
-from prompts import PREAMBLE, condition_prompt, parse_envelope, placebo_text, task_prompt
+from prompts import PREAMBLE, condition_prompt, parse_envelope, task_prompt
+from control_selection import (CONTROL_SNAPSHOTS, ControlError, control_for_sources, freeze_control,
+                               read_frozen_control, committed_control_errors)
 from providers import APIClient, OfflineClient, ConfigurationError, ProviderError, preflight, settings_for
 from source_selection import (load_sources, freeze_sources, committed_source_errors,
                               model_families, record_path, safe_date, safe_run_id)
@@ -60,11 +62,13 @@ def public_dossier(fixture_id: str):
 def make_manifest(args, configs, conditions, ids, sources, phase):
     skill, rubric, provenance = sources.skill, sources.rubric, sources.provenance
     families, _ = model_families()
-    placebo = placebo_text(skill + "\n\n" + rubric)
-    manifest = {"schema_version": 2, "status": "prepared", "phase": phase, "is_empirical": phase != "offline_smoke",
+    control = control_for_sources(ROOT, sources)
+    placebo = control.text
+    manifest = {"schema_version": 3, "status": "prepared", "phase": phase, "is_empirical": phase != "offline_smoke",
             "date": args.date, "timezone": "America/New_York", "source_commit": provenance["commit"],
             "source_provenance": provenance, "source_selection": sources.selection_mode,
             "source_record": sources.selected_record, "source_version": sources.version,
+            "placebo_control": control.metadata,
             "models": {s.role: dict(s.public(), **families.get(s.role, {})) for s in configs},
             "family_verification": "operator declarations only; model families are not inferred from names or API-verified",
             "seed_base": SEED_BASE,
@@ -83,14 +87,14 @@ def make_manifest(args, configs, conditions, ids, sources, phase):
             "completed_empirical_trials": 0, "missing_environment": []}
     manifest["file_hashes"] = {str(p.relative_to(ROOT)): sha256(p.read_bytes()) for p in sorted((ROOT / "evals").rglob("*"))
                                if p.is_file() and p.suffix in {".py", ".md", ".json", ".csv", ".txt"}
-                               and (len(p.relative_to(ROOT / "evals").parts) == 1 or p.relative_to(ROOT / "evals").parts[0] == "fixtures")
+                               and (len(p.relative_to(ROOT / "evals").parts) == 1 or p.relative_to(ROOT / "evals").parts[0] in {"fixtures", "controls"})
                                and not any(part.startswith(".") or part == "__pycache__" for part in p.relative_to(ROOT / "evals").parts)}
     manifest["planned_main_trials"] = len(ids) * len(manifest["seeds"]) * len(conditions) * len(TASKS)
     manifest["planned_main_judgments"] = 2 * manifest["planned_main_trials"]
     manifest["bootstrap_resamples"] = args.bootstrap
     manifest["pilot_gate"] = "two fixtures, one seed, all three conditions/tasks; transport/schema only, not treatment performance"
     manifest["coach_simulation"] = "one separately generated LLM builder script per fixture/seed, replayed unchanged across conditions"
-    identity = {"sources": sources.identity, "models": manifest["models"], "files": manifest["file_hashes"],
+    identity = {"sources": sources.identity, "control": control.metadata, "models": manifest["models"], "files": manifest["file_hashes"],
                 "conditions": conditions, "seeds_requested": args.seeds, "seed_base": SEED_BASE,
                 "tasks": TASKS, "coach_max_agent_turns": 12, "bootstrap_resamples": args.bootstrap}
     manifest["configuration_sha256"] = sha256(json.dumps(identity, sort_keys=True, ensure_ascii=False))
@@ -109,8 +113,11 @@ def guard_record(output, manifest):
         raise ConfigurationError("Record has live data without a matching manifest; select a fresh --run-id")
 
 
-def freeze_run_inputs(output, sources, conditions):
-    placebo = placebo_text(sources.skill + "\n\n" + sources.rubric)
+def freeze_run_inputs(output, sources, conditions, expected_control=None):
+    control = control_for_sources(ROOT, sources)
+    if expected_control is not None and control.metadata != expected_control:
+        raise ControlError("Neutral control changed after manifest selection; select a fresh run ID")
+    placebo = control.text
     inputs = {name.replace(".md", ".frozen.md"): (ROOT / "evals" / name).read_bytes()
               for name in ["PROTOCOL.md", "judge_rubric.md"]}
     inputs["inputs/key.json"] = (ROOT / "evals/fixtures/key.json").read_bytes()
@@ -120,7 +127,10 @@ def freeze_run_inputs(output, sources, conditions):
         path = output / name
         if path.exists() and path.read_bytes() != content:
             raise ConfigurationError("Frozen run input changed: " + name + "; select a fresh --run-id")
+    if any((output / name).exists() for name in CONTROL_SNAPSHOTS):
+        read_frozen_control(output, sources.skill + "\n\n" + sources.rubric, control.metadata)
     frozen = freeze_sources(output, sources)
+    freeze_control(output, control)
     for name, content in inputs.items():
         path = output / name
         if not path.exists():
@@ -193,7 +203,7 @@ def pilot_auxiliary():
 def pilot_smoke(output, manifest, skill, rubric):
     folder = output / "pilot" / "offline_smoke"
     folder.mkdir(parents=True, exist_ok=True)
-    placebo = placebo_text(skill + "\n\n" + rubric)
+    placebo = read_frozen_control(output, skill + "\n\n" + rubric, manifest.get("placebo_control")).text
     persona, team = pilot_auxiliary()
     client = OfflineClient(settings_for("eval"))
     checks, count = [], 0
@@ -288,16 +298,21 @@ def main():
     manifest = make_manifest(args, configs, conditions, ids, sources, phase)
     output = record_path(ROOT, args.date + "/" + manifest["run_id"])
     guard_record(output, manifest)
-    sources = freeze_run_inputs(output, sources, conditions)
+    sources = freeze_run_inputs(output, sources, conditions, manifest["placebo_control"])
     manifest["source_provenance"] = sources.provenance
     manifest["record_path"] = str(output.relative_to(ROOT))
     write_json(output / "validation.json", validation)
     if args.offline_smoke:
+        manifest.update(status="offline_smoke", is_empirical=False)
+        write_json(output / "manifest.json", manifest)
         return pilot_smoke(output, manifest, skill, rubric)
     _, family_errors = model_families()
-    source_errors = committed_source_errors(ROOT, sources)
+    source_errors = committed_source_errors(ROOT, sources) + committed_control_errors(
+        ROOT, read_frozen_control(output, skill + "\n\n" + rubric, manifest["placebo_control"]),
+        sources.provenance.get("commit"), check_checkout=sources.selection_mode == "checkout")
     manifest["source_commit_verification"] = {"status": "failed" if source_errors else "verified",
-        "scope": ["skills/worth-using/SKILL.md", "skills/worth-using/references/rubric.md"], "errors": source_errors}
+        "scope": ["skills/worth-using/SKILL.md", "skills/worth-using/references/rubric.md",
+                  manifest["placebo_control"]["corpus_path"], manifest["placebo_control"]["registry_path"]], "errors": source_errors}
     blockers = preflight(configs) + family_errors + source_errors
     if blockers:
         manifest.update(status="blocked_before_live_pilot", is_empirical=False, missing_environment=blockers)
@@ -319,11 +334,13 @@ def main():
     from reporting import write_reports
     try:
         # Recheck immediately before the first possible live call.
-        source_errors = committed_source_errors(ROOT, sources)
+        source_errors = committed_source_errors(ROOT, sources) + committed_control_errors(
+            ROOT, read_frozen_control(output, skill + "\n\n" + rubric, manifest["placebo_control"]),
+            sources.provenance.get("commit"), check_checkout=sources.selection_mode == "checkout")
         if source_errors:
             raise ConfigurationError("; ".join(source_errors))
         run_experiment(ROOT, output, manifest, configs, skill, rubric, args, public_dossier)
-    except (ConfigurationError, ProviderError) as exc:
+    except (ConfigurationError, ProviderError, ControlError) as exc:
         current = json.loads((output / "manifest.json").read_text()) if (output / "manifest.json").exists() else manifest
         current.update(status="live_execution_blocked_or_failed", execution_error=str(exc))
         write_json(output / "manifest.json", current)
@@ -341,6 +358,6 @@ def main():
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except (ConfigurationError, ProviderError) as exc:
+    except (ConfigurationError, ProviderError, ControlError) as exc:
         print("Evaluation stopped: " + str(exc), file=sys.stderr)
         sys.exit(2)

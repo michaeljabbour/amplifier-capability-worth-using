@@ -8,7 +8,7 @@ from pathlib import Path
 import re
 
 from metrics import CRITERIA, EVIDENCE_RANK, RATING_RANK, resolve_team_ratings
-from prompts import placebo_text
+from control_selection import control_for_sources
 from source_selection import load_sources, git_blob
 
 EXPECTED_TRAPS = {"setup_wall", "silent_failure", "two_jobs", "unsupported_quote", "prompted_return", "clean"}
@@ -98,11 +98,11 @@ def validate_suite(root: Path, *, full=True, sources=None):
             errors.append("Selected source bytes differ: " + item["snapshot"])
     source = sources.skill + "\n\n" + sources.rubric
     try:
-        placebo = placebo_text(source)
+        placebo = control_for_sources(root, sources).text
     except ValueError as exc:
         errors.append(str(exc))
-        placebo = (root / "evals/placebo.txt").read_text()
+        placebo = None  # Missing/mismatched controls never fall back to another version.
     return {"status": "passed" if not errors else "failed", "is_empirical": False,
             "fixtures": per_fixture, "category_counts": dict(sorted(counts.items())),
             "source_selection": sources.selection_mode, "source_version": sources.version,
-            "source_words": len(source.split()), "placebo_words": len(placebo.split()), "errors": errors}
+            "source_words": len(source.split()), "placebo_words": len(placebo.split()) if placebo is not None else None, "errors": errors}

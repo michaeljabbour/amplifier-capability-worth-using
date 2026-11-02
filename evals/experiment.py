@@ -10,7 +10,8 @@ import statistics
 import time
 
 import metrics
-from prompts import SIMULATOR_PROMPT, condition_prompt, parse_envelope, placebo_text, task_prompt
+from prompts import SIMULATOR_PROMPT, condition_prompt, parse_envelope, task_prompt
+from control_selection import read_frozen_control
 from providers import APIClient, ConfigurationError, ProviderError
 
 CRITERIA = metrics.CRITERIA
@@ -471,11 +472,14 @@ def prepare_hand_check(output, trials, judge_records):
                 writer.writerow({"blind_id": row["blind_id"]})
 
 
-def run_phase(root, output, manifest, configs, skill, rubric, ids, seeds, load_dossier):
+def run_phase(root, output, manifest, configs, skill, rubric, ids, seeds, load_dossier, *, control_root=None):
     output = Path(output)
-    recorder = Recorder(output, configs)
     key = json.loads((root / "evals" / "fixtures" / "key.json").read_text())["fixtures"]
-    placebo = placebo_text(skill + "\n\n" + rubric)
+    placebo = read_frozen_control(control_root or output, skill + "\n\n" + rubric, manifest.get("placebo_control")).text
+    for condition in manifest["conditions"]:
+        if digest(condition_prompt(condition, skill, rubric, placebo)) != manifest["prompt_hashes"][condition]:
+            raise ConfigurationError("Frozen condition prompt differs from the recorded manifest")
+    recorder = Recorder(output, configs)
     signature = digest({"models": manifest["models"], "sources": manifest["source_hashes"],
                         "prompts": manifest["prompt_hashes"], "fixtures": {f: key[f] for f in ids},
                         "judge_rubric": (root / "evals" / "judge_rubric.md").read_text(),
@@ -544,10 +548,11 @@ def run_phase(root, output, manifest, configs, skill, rubric, ids, seeds, load_d
 
 
 def run_experiment(root, output, manifest, configs, skill, rubric, args, load_dossier):
+    read_frozen_control(output, skill + "\n\n" + rubric, manifest.get("placebo_control"))
     pilot_output = output / "pilot" / "live"
     manifest["seed_base"] = 41001
     write_json(output / "manifest.json", dict(manifest, status="live_pilot_running"))
-    pilot = run_phase(root, pilot_output, manifest, configs, skill, rubric, ["f01", "f06"], [41001], load_dossier)
+    pilot = run_phase(root, pilot_output, manifest, configs, skill, rubric, ["f01", "f06"], [41001], load_dossier, control_root=output)
     trials, judged, _ = pilot
     # Pilot gates transport/measurement only, never whether the treatment beats controls.
     passed = len(trials) == 18 and len(judged) == 36 and all(t["status"] in {"complete", "turn_censored"} for t in trials) and all(j["status"] == "complete" for j in judged)
@@ -565,7 +570,7 @@ def run_experiment(root, output, manifest, configs, skill, rubric, args, load_do
         raise ConfigurationError("Full experiment requires all twelve frozen fixtures")
     manifest["status"] = "main_run_running"
     write_json(output / "manifest.json", manifest)
-    result = run_phase(root, output, manifest, configs, skill, rubric, manifest["fixture_list"], manifest["seeds"], load_dossier)
+    result = run_phase(root, output, manifest, configs, skill, rubric, manifest["fixture_list"], manifest["seeds"], load_dossier, control_root=output)
     trials, judged, rows = result
     manifest.update(status="run_complete_hand_check_pending", completed_empirical_trials=len(trials),
                     completed_judgments=sum(j["status"] == "complete" for j in judged),

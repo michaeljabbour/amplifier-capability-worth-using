@@ -88,7 +88,7 @@ class PromptTests(unittest.TestCase):
 
     def test_placebo_uses_the_frozen_coherent_paragraph(self):
         frozen = Path(__file__).with_name("placebo.txt").read_text()
-        generated = prompts.placebo_text(" ".join(["source"] * 3083))
+        generated = prompts.placebo_text(" ".join(["source"] * 3083), frozen_text=frozen)
         self.assertEqual(generated.strip(), frozen.strip())
         self.assertEqual(len(generated.split()), 3083)
 
