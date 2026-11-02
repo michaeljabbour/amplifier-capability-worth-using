@@ -10,6 +10,7 @@ import html
 import json
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 import zipfile
@@ -627,6 +628,8 @@ def main():
     args = parser.parse_args()
     try:
         data = config()
+        if data.get('site_builder') == 'native' and args.operation in {'build', 'check'}:
+            return subprocess.run([sys.executable, str(ROOT / 'scripts' / (args.operation + '.py'))], check=False).returncode
         if args.operation == "build":
             build(data)
         elif args.operation == "check":
